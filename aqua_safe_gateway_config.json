@@ -1,0 +1,722 @@
+[
+    {
+        "id": "c333f693b53ee532",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f0a17d888d19e23b",
+        "type": "http in",
+        "z": "c333f693b53ee532",
+        "name": "Incoming_Gps/SOS",
+        "url": "/api/broadcast-gps",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 270,
+        "y": 180,
+        "wires": [
+            [
+                "e628b467681c1914",
+                "ec72d7d6190bc78f"
+            ]
+        ]
+    },
+    {
+        "id": "e628b467681c1914",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "gps-http-req-debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "ac8e89b6aa2dd79d",
+        "type": "http in",
+        "z": "c333f693b53ee532",
+        "name": "Incoming_ChatData",
+        "url": "api/broadcast-chat_data",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 310,
+        "y": 1000,
+        "wires": [
+            [
+                "c7a268189adf4075",
+                "e820ca795c35f55a"
+            ]
+        ]
+    },
+    {
+        "id": "c7a268189adf4075",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "chat-http-req-debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 630,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "60cdcc24d9cf55dd",
+        "type": "function",
+        "z": "c333f693b53ee532",
+        "name": "retreive data from payload",
+        "func": "// Extract values from the incoming payload\nvar id = msg.payload.id;  // Extract 'id'\nvar m = msg.payload.m;    // Extract 'm'\n\n// Construct the AT+SEND command\n// For example: AT+SEND=1,003|UVckeFY|5,0,3\nvar port = 1;               // Specify the port (e.g., 1)\nvar data = id + \"|\" + m;    // Construct the data payload\nvar confirm = 0;            // Unconfirmed message\nvar retry = 3;              // Number of retries\n\n// Build the AT command\nvar atCommand = \"AT+SEND=\" + port + \",\" + data + \",\" + confirm + \",\" + retry + \"\\r\\n\";\n\n// Set the payload to the constructed AT command\nmsg.payload = atCommand;\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 920,
+        "wires": [
+            [
+                "b80658643fa14b2f",
+                "0f8cb2c6b5e98446",
+                "dfb40632acbf83e9"
+            ]
+        ]
+    },
+    {
+        "id": "0f8cb2c6b5e98446",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "extract-chat-debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1130,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "b80658643fa14b2f",
+        "type": "serial out",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "serial": "bb1c0e81fd51fa9e",
+        "x": 1310,
+        "y": 1000,
+        "wires": []
+    },
+    {
+        "id": "964fd8ca1da5353d",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "AT+FRE",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+FRE=433.775,433.775",
+        "payloadType": "str",
+        "x": 1200,
+        "y": 1140,
+        "wires": [
+            [
+                "b80658643fa14b2f"
+            ]
+        ]
+    },
+    {
+        "id": "a85ef28ee2e16f12",
+        "type": "http request",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://172.31.255.253:3000/api/reRoute/Gps",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "Content-Type",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 830,
+        "y": 1380,
+        "wires": [
+            [
+                "f98da66b5a5e97a3"
+            ]
+        ]
+    },
+    {
+        "id": "4f36edb8966dd288",
+        "type": "function",
+        "z": "c333f693b53ee532",
+        "name": "retrieve data from payload",
+        "func": "//Extract the data from the payload\nvar id = msg.payload.id;\nvar location = msg.payload.l;\nvar status = msg.payload.s;\n\nvar gpsParts = location.split(\"|\");\nvar latitude = gpsParts[0];\nvar longitude = gpsParts[1];\n\nvar data = id + \"|\" + latitude + \"|\" + longitude + \"|\" + status;\n\n// AT command format: AT+SEND=<Port>,<Data>,<Confirm>,<Retry>\nvar port = 1; \nvar confirm = 0;\nvar retry = 3;      \n\n// Build the AT command\n// var atCommand = \"AT+SEND=\" + port + \",\" + data + \",\" + confirm + \",\" + retry + \"\\r\\n\";\nvar atCommand = \"AT+SEND=\" + port + \",\" + data + \",\" + confirm + \",\" + retry + \"\\r\\n\";\n// Set the payload to the constructed AT command\nmsg.payload = atCommand;\n\nreturn msg;\n// var port = 1;\n// var confirm = 0;\n// var retry = 3;\n\n// // Construct the AT command, enclosing the data in quotes\n// var atCommand = \"AT+SEND=\" + port + \",\\\"Hello\\\",\" + confirm + \",\" + retry + \"\\r\\n\";\n\n// // Set the payload to the constructed AT command\n// msg.payload = atCommand;\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 120,
+        "wires": [
+            [
+                "34c3e0efa4262491",
+                "88a55313c02e2cbe",
+                "ce84f8066232772c"
+            ]
+        ]
+    },
+    {
+        "id": "34c3e0efa4262491",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "extract-gps-debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1070,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "88a55313c02e2cbe",
+        "type": "serial out",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "serial": "bb1c0e81fd51fa9e",
+        "x": 1250,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "c9c36d90b340c23d",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "AT+FRE",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+FRE=433.775,433.775",
+        "payloadType": "str",
+        "x": 1180,
+        "y": 320,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "ec72d7d6190bc78f",
+        "type": "function",
+        "z": "c333f693b53ee532",
+        "name": "validate incoming data",
+        "func": "if (!msg.payload.id || !msg.payload.l || !msg.payload.s) {\n    msg.error = \"Missing required fields: 'id', 'l', or 's'\";\n    return [null, msg];\n}\n\n// Here if there is an error it will send the message to the 2nd output.\nif (!/^-?\\d+(\\.\\d+)?\\|-?\\d+(\\.\\d+)?$/.test(msg.payload.l)) {\n    msg.error = \"Invalid GPS format in 'l'. Expected 'latitude|longitude'\";\n    return [null, msg];\n}\n\n// If format correct it will send the message to the first output\nreturn [msg, null];\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 180,
+        "wires": [
+            [
+                "4f36edb8966dd288"
+            ],
+            [
+                "c02664d49d602b56",
+                "20fb0dc0536757cc"
+            ]
+        ]
+    },
+    {
+        "id": "20fb0dc0536757cc",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "error-gps_format",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "c02664d49d602b56",
+        "type": "http response",
+        "z": "c333f693b53ee532",
+        "name": "response-invalid-gps-format",
+        "statusCode": "400",
+        "headers": {},
+        "x": 860,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "ce84f8066232772c",
+        "type": "http response",
+        "z": "c333f693b53ee532",
+        "name": "gps-response-success",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "x": 900,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "e820ca795c35f55a",
+        "type": "function",
+        "z": "c333f693b53ee532",
+        "name": "validate chat data",
+        "func": "if (!msg.payload.id || !msg.payload.m) {\n    msg.error = \"Missing required fields: 'id' or 'message'\";\n    return [null, msg];\n}\n\n// Ensure 'message' is within size limits\nif (msg.payload.m.length > 255) {\n    msg.error = \"Message length exceeds limit of 255 characters\";\n    return [null, msg];\n}\n\nreturn [msg, null];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 980,
+        "wires": [
+            [
+                "60cdcc24d9cf55dd"
+            ],
+            [
+                "7a387fec6ba578e1",
+                "a63d260cf7b14c3e"
+            ]
+        ]
+    },
+    {
+        "id": "7a387fec6ba578e1",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "error-chat_format/length",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "a63d260cf7b14c3e",
+        "type": "http response",
+        "z": "c333f693b53ee532",
+        "name": "response-invalid-chat-format/length",
+        "statusCode": "400",
+        "headers": {},
+        "x": 920,
+        "y": 1140,
+        "wires": []
+    },
+    {
+        "id": "dfb40632acbf83e9",
+        "type": "http response",
+        "z": "c333f693b53ee532",
+        "name": "chat-response-success",
+        "statusCode": "200",
+        "headers": {
+            "Content-type": "application/json"
+        },
+        "x": 990,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "5fbaa24e2ad116c8",
+        "type": "serial in",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "serial": "bb1c0e81fd51fa9e",
+        "x": 90,
+        "y": 1200,
+        "wires": [
+            [
+                "ca4359c25f2a0fa5"
+            ]
+        ]
+    },
+    {
+        "id": "26a24987e9b7532d",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "Inject demo Gps data",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+SEND=1,128|0000|80.12321|13.32432|1,0,3",
+        "payloadType": "str",
+        "x": 160,
+        "y": 1380,
+        "wires": [
+            [
+                "2f61cf27d8852f5a"
+            ]
+        ]
+    },
+    {
+        "id": "2f61cf27d8852f5a",
+        "type": "function",
+        "z": "c333f693b53ee532",
+        "name": "msg payload - string -> json",
+        "func": "// Simulated AT+SEND string\nvar atCommand = msg.payload;\n\n// Ensure it starts with \"AT+SEND=\"\nif (!atCommand.startsWith(\"AT+SEND=\")) {\n    node.error(\"Invalid AT+SEND command\", msg);\n    return null;\n}\n\n// Remove \"AT+SEND=\"\nvar data = atCommand.substring(8);\n\n// Split the command into its components\nvar parts = data.split(\",\");\nif (parts.length < 4) {\n    node.error(\"Invalid AT+SEND command structure\", msg);\n    return null;\n}\n\n// Parse the payload (e.g., 123|0000|80.12321|13.32432|0)\nvar payloadParts = parts[1].split(\"|\");\nif (payloadParts.length < 5) {\n    node.error(\"Invalid payload structure\", msg);\n    return null;\n}\n\n// Construct the JSON payload in the required format\nmsg.payload = {\n    id: payloadParts[0] + \"|\" + payloadParts[1], // Combine id and device\n    l: payloadParts[2] + \"|\" + payloadParts[3],  // Combine latitude and longitude\n    s: parseInt(payloadParts[4])                // Status\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1380,
+        "wires": [
+            [
+                "a85ef28ee2e16f12",
+                "bcbc7f31c9d4f854"
+            ]
+        ]
+    },
+    {
+        "id": "bcbc7f31c9d4f854",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 1280,
+        "wires": []
+    },
+    {
+        "id": "f98da66b5a5e97a3",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 1280,
+        "wires": []
+    },
+    {
+        "id": "4184ae3013bdc1c5",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+SYNCWORD=1",
+        "payloadType": "str",
+        "x": 1210,
+        "y": 400,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "2c410ce3cde5cd81",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+BW=0,0",
+        "payloadType": "str",
+        "x": 1190,
+        "y": 460,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "dfc499b46caff119",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+SF=12,12",
+        "payloadType": "str",
+        "x": 1190,
+        "y": 520,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "8e9587017f12ab22",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+CRC=1,1",
+        "payloadType": "str",
+        "x": 1190,
+        "y": 580,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "c174620bb07fdb39",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+HEADER=0,0",
+        "payloadType": "str",
+        "x": 1210,
+        "y": 640,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "5d3f9d6502c7c6bb",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+CR=1,1",
+        "payloadType": "str",
+        "x": 1190,
+        "y": 700,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "ca4359c25f2a0fa5",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 320,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "8a981a85a77c28a2",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "ATZ",
+        "payloadType": "str",
+        "x": 1170,
+        "y": 260,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "bb1c0e81fd51fa9e",
+        "type": "serial-port",
+        "serialport": "/dev/ttyUSB0",
+        "serialbaud": "9600",
+        "databits": "8",
+        "parity": "none",
+        "stopbits": "1",
+        "waitfor": "",
+        "dtr": "none",
+        "rts": "none",
+        "cts": "none",
+        "dsr": "none",
+        "newline": "\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": "\\r\\n",
+        "responsetimeout": "10000"
+    }
+]
