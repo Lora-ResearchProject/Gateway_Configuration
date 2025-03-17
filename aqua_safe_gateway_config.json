@@ -11,12 +11,12 @@
         "id": "f0a17d888d19e23b",
         "type": "http in",
         "z": "c333f693b53ee532",
-        "name": "Incoming_Gps/SOS",
+        "name": "GPS/SOS data from AquaSafe",
         "url": "/api/broadcast-gps",
         "method": "post",
         "upload": false,
         "swaggerDoc": "",
-        "x": 270,
+        "x": 230,
         "y": 180,
         "wires": [
             [
@@ -46,12 +46,12 @@
         "id": "ac8e89b6aa2dd79d",
         "type": "http in",
         "z": "c333f693b53ee532",
-        "name": "Incoming_ChatData",
+        "name": "Chat Data from AquaSafe",
         "url": "api/broadcast-chat_data",
         "method": "post",
         "upload": false,
         "swaggerDoc": "",
-        "x": 310,
+        "x": 330,
         "y": 1000,
         "wires": [
             [
@@ -155,42 +155,11 @@
         ]
     },
     {
-        "id": "a85ef28ee2e16f12",
-        "type": "http request",
-        "z": "c333f693b53ee532",
-        "name": "",
-        "method": "POST",
-        "ret": "txt",
-        "paytoqs": "ignore",
-        "url": "http://172.31.255.253:3000/api/reRoute/Gps",
-        "tls": "",
-        "persist": false,
-        "proxy": "",
-        "insecureHTTPParser": false,
-        "authType": "",
-        "senderr": false,
-        "headers": [
-            {
-                "keyType": "other",
-                "keyValue": "Content-Type",
-                "valueType": "other",
-                "valueValue": "application/json"
-            }
-        ],
-        "x": 830,
-        "y": 1380,
-        "wires": [
-            [
-                "f98da66b5a5e97a3"
-            ]
-        ]
-    },
-    {
         "id": "4f36edb8966dd288",
         "type": "function",
         "z": "c333f693b53ee532",
         "name": "retrieve data from payload",
-        "func": "//Extract the data from the payload\nvar id = msg.payload.id;\nvar location = msg.payload.l;\nvar status = msg.payload.s;\n\nvar gpsParts = location.split(\"|\");\nvar latitude = gpsParts[0];\nvar longitude = gpsParts[1];\n\nvar data = id + \"|\" + latitude + \"|\" + longitude + \"|\" + status;\n\n// AT command format: AT+SEND=<Port>,<Data>,<Confirm>,<Retry>\nvar port = 1; \nvar confirm = 0;\nvar retry = 3;      \n\n// Build the AT command\n// var atCommand = \"AT+SEND=\" + port + \",\" + data + \",\" + confirm + \",\" + retry + \"\\r\\n\";\nvar atCommand = \"AT+SEND=\" + port + \",\" + data + \",\" + confirm + \",\" + retry + \"\\r\\n\";\n// Set the payload to the constructed AT command\nmsg.payload = atCommand;\n\nreturn msg;\n// var port = 1;\n// var confirm = 0;\n// var retry = 3;\n\n// // Construct the AT command, enclosing the data in quotes\n// var atCommand = \"AT+SEND=\" + port + \",\\\"Hello\\\",\" + confirm + \",\" + retry + \"\\r\\n\";\n\n// // Set the payload to the constructed AT command\n// msg.payload = atCommand;\n\nreturn msg;\n",
+        "func": "//Extract the data from the payload\nvar id = msg.payload.id;\nvar location = msg.payload.l;\nvar status = msg.payload.s;\n\nvar gpsParts = location.split(\"|\");\nvar latitude = gpsParts[0];\nvar longitude = gpsParts[1];\n\nvar data = id + \"|\" + latitude + \"|\" + longitude + \"|\" + status;\n\nvar encodedData = Buffer.from(data).toString('base64');\n\n// AT command format: AT+SEND=<Port>,<Data>,<Confirm>,<Retry>\nvar port = 1; \nvar confirm = 0;\nvar retry = 3;      \n\n// Build the AT command\nvar atCommand = \"AT+SEND=\" + port + \",\\\"\" + encodedData + \"\\\",\" + confirm + \",\" + retry + \"\\r\\n\";\nmsg.payload = atCommand;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -232,35 +201,6 @@
         "x": 1250,
         "y": 160,
         "wires": []
-    },
-    {
-        "id": "c9c36d90b340c23d",
-        "type": "inject",
-        "z": "c333f693b53ee532",
-        "name": "AT+FRE",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "AT+FRE=433.775,433.775",
-        "payloadType": "str",
-        "x": 1180,
-        "y": 320,
-        "wires": [
-            [
-                "88a55313c02e2cbe"
-            ]
-        ]
     },
     {
         "id": "ec72d7d6190bc78f",
@@ -391,292 +331,7 @@
         "wires": []
     },
     {
-        "id": "5fbaa24e2ad116c8",
-        "type": "serial in",
-        "z": "c333f693b53ee532",
-        "name": "",
-        "serial": "bb1c0e81fd51fa9e",
-        "x": 90,
-        "y": 1200,
-        "wires": [
-            [
-                "ca4359c25f2a0fa5"
-            ]
-        ]
-    },
-    {
-        "id": "26a24987e9b7532d",
-        "type": "inject",
-        "z": "c333f693b53ee532",
-        "name": "Inject demo Gps data",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "AT+SEND=1,128|0000|80.12321|13.32432|1,0,3",
-        "payloadType": "str",
-        "x": 160,
-        "y": 1380,
-        "wires": [
-            [
-                "2f61cf27d8852f5a"
-            ]
-        ]
-    },
-    {
-        "id": "2f61cf27d8852f5a",
-        "type": "function",
-        "z": "c333f693b53ee532",
-        "name": "msg payload - string -> json",
-        "func": "// Simulated AT+SEND string\nvar atCommand = msg.payload;\n\n// Ensure it starts with \"AT+SEND=\"\nif (!atCommand.startsWith(\"AT+SEND=\")) {\n    node.error(\"Invalid AT+SEND command\", msg);\n    return null;\n}\n\n// Remove \"AT+SEND=\"\nvar data = atCommand.substring(8);\n\n// Split the command into its components\nvar parts = data.split(\",\");\nif (parts.length < 4) {\n    node.error(\"Invalid AT+SEND command structure\", msg);\n    return null;\n}\n\n// Parse the payload (e.g., 123|0000|80.12321|13.32432|0)\nvar payloadParts = parts[1].split(\"|\");\nif (payloadParts.length < 5) {\n    node.error(\"Invalid payload structure\", msg);\n    return null;\n}\n\n// Construct the JSON payload in the required format\nmsg.payload = {\n    id: payloadParts[0] + \"|\" + payloadParts[1], // Combine id and device\n    l: payloadParts[2] + \"|\" + payloadParts[3],  // Combine latitude and longitude\n    s: parseInt(payloadParts[4])                // Status\n};\n\nreturn msg;\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 500,
-        "y": 1380,
-        "wires": [
-            [
-                "a85ef28ee2e16f12",
-                "bcbc7f31c9d4f854"
-            ]
-        ]
-    },
-    {
-        "id": "bcbc7f31c9d4f854",
-        "type": "debug",
-        "z": "c333f693b53ee532",
-        "name": "debug 2",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 740,
-        "y": 1280,
-        "wires": []
-    },
-    {
-        "id": "f98da66b5a5e97a3",
-        "type": "debug",
-        "z": "c333f693b53ee532",
-        "name": "debug 3",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1040,
-        "y": 1280,
-        "wires": []
-    },
-    {
-        "id": "4184ae3013bdc1c5",
-        "type": "inject",
-        "z": "c333f693b53ee532",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "AT+SYNCWORD=1",
-        "payloadType": "str",
-        "x": 1210,
-        "y": 400,
-        "wires": [
-            [
-                "88a55313c02e2cbe"
-            ]
-        ]
-    },
-    {
-        "id": "2c410ce3cde5cd81",
-        "type": "inject",
-        "z": "c333f693b53ee532",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "AT+BW=0,0",
-        "payloadType": "str",
-        "x": 1190,
-        "y": 460,
-        "wires": [
-            [
-                "88a55313c02e2cbe"
-            ]
-        ]
-    },
-    {
-        "id": "dfc499b46caff119",
-        "type": "inject",
-        "z": "c333f693b53ee532",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "AT+SF=12,12",
-        "payloadType": "str",
-        "x": 1190,
-        "y": 520,
-        "wires": [
-            [
-                "88a55313c02e2cbe"
-            ]
-        ]
-    },
-    {
-        "id": "8e9587017f12ab22",
-        "type": "inject",
-        "z": "c333f693b53ee532",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "AT+CRC=1,1",
-        "payloadType": "str",
-        "x": 1190,
-        "y": 580,
-        "wires": [
-            [
-                "88a55313c02e2cbe"
-            ]
-        ]
-    },
-    {
-        "id": "c174620bb07fdb39",
-        "type": "inject",
-        "z": "c333f693b53ee532",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "AT+HEADER=0,0",
-        "payloadType": "str",
-        "x": 1210,
-        "y": 640,
-        "wires": [
-            [
-                "88a55313c02e2cbe"
-            ]
-        ]
-    },
-    {
-        "id": "5d3f9d6502c7c6bb",
-        "type": "inject",
-        "z": "c333f693b53ee532",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "AT+CR=1,1",
-        "payloadType": "str",
-        "x": 1190,
-        "y": 700,
-        "wires": [
-            [
-                "88a55313c02e2cbe"
-            ]
-        ]
-    },
-    {
-        "id": "ca4359c25f2a0fa5",
-        "type": "debug",
-        "z": "c333f693b53ee532",
-        "name": "debug 4",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 320,
-        "y": 1220,
-        "wires": []
-    },
-    {
-        "id": "8a981a85a77c28a2",
+        "id": "ca948b8ad993c4f7",
         "type": "inject",
         "z": "c333f693b53ee532",
         "name": "",
@@ -692,13 +347,457 @@
         "topic": "",
         "payload": "ATZ",
         "payloadType": "str",
-        "x": 1170,
-        "y": 260,
+        "x": 1210,
+        "y": 300,
         "wires": [
             [
                 "88a55313c02e2cbe"
             ]
         ]
+    },
+    {
+        "id": "6eac99d5e419c872",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "AT+FRE",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+FRE=433.000,433.000",
+        "payloadType": "str",
+        "x": 1200,
+        "y": 360,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "35ed2411124c78ab",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "AT+BW",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+BW=0,0",
+        "payloadType": "str",
+        "x": 1210,
+        "y": 420,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "75aef44eb01b287f",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "AT+SF",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+SF=12,12",
+        "payloadType": "str",
+        "x": 1210,
+        "y": 480,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "a0ae4434ad3bb9f8",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "AT+RXMOD (no ACK reply)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+RXMOD=65535,0",
+        "payloadType": "str",
+        "x": 1240,
+        "y": 540,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "8f21afa584178385",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "AT+SYNCWORD",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+SYNCWORD=0",
+        "payloadType": "str",
+        "x": 1180,
+        "y": 600,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "5fbaa24e2ad116c8",
+        "type": "serial in",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "serial": "bb1c0e81fd51fa9e",
+        "x": 170,
+        "y": 1940,
+        "wires": [
+            [
+                "ca4359c25f2a0fa5",
+                "3a01e1f9e03f6c78"
+            ]
+        ]
+    },
+    {
+        "id": "ca4359c25f2a0fa5",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 1840,
+        "wires": []
+    },
+    {
+        "id": "1e9b79fa1d374f61",
+        "type": "inject",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "AT+RXDAFORM=1",
+        "payloadType": "str",
+        "x": 1210,
+        "y": 660,
+        "wires": [
+            [
+                "88a55313c02e2cbe"
+            ]
+        ]
+    },
+    {
+        "id": "3a01e1f9e03f6c78",
+        "type": "function",
+        "z": "c333f693b53ee532",
+        "name": "Sort and call relevant APIs",
+        "func": "// Ensure the payload is a string\nif (typeof msg.payload !== \"string\") {\n    msg.payload = msg.payload.toString();\n}\n\n// Trim any leading or trailing whitespace\nvar payloadStr = msg.payload.trim();\n\n// Define the prefix to identify the message format\nvar prefix = \"Data: (String: ) \";\n\n// Check if the payload starts with the expected prefix\nif (payloadStr.startsWith(prefix)) {\n    // Remove the prefix to isolate the packet data\n    var packetData = payloadStr.substring(prefix.length).trim();\n\n    // Split the packet data using '|' as the delimiter\n    var parts = packetData.split(\"|\");\n\n    var jsonData = {};\n    var apiUrl = \"\";\n\n    // Log received parts\n    node.log(\"Received parts: \" + JSON.stringify(parts));\n\n    // Determine the data type based on the first element\n    if (parts.length === 5 && !isNaN(parts[0])) {\n        // GPS / SOS Data\n        jsonData = {\n            \"id\": parts[0] + \"|\" + parts[1],  // Combine the first two parts for \"id\"\n            \"l\": parts[2] + \"|\" + parts[3],   // Combine latitude and longitude for \"l\"\n            \"s\": parseInt(parts[4], 10),       // Convert status to an integer\n            \"apiUrl\": \"\"\n        };\n        jsonData.apiUrl = \"reRouteGps\";\n\n    } else if (parts.length === 6 && parts[0] === \"w\") {\n        // Weather Data\n        jsonData = {\n            \"id\": parts[1] + \"|\" + parts[2],\n            \"l\": parseFloat(parts[3]).toFixed(4) + \"|\" + parseFloat(parts[4]).toFixed(4),\n            \"wr\": parseInt(parts[5], 10),\n            \"apiUrl\": \"\"\n        };\n        jsonData.apiUrl = \"getWeatherDataFromServer\";\n\n        node.log(jsonData);\n\n    } else if (parts.length === 3 && parts[0] === \"h\") {\n        // Hotspot Data\n        jsonData = {\n            \"latitude\": parseFloat(parts[1]),\n            \"longitude\": parseFloat(parts[2]),\n            \"apiUrl\": \"\"\n        };\n        jsonData.apiUrl = \"getHotpostDataFromServer\";\n\n    } else if (parts.length === 4 && parts[0] === \"c\") {\n        // Chat Data (No API call for now, just return it)\n        jsonData = {\n            \"id\": parts[2],\n            \"message\": parseInt(parts[3], 10),\n            \"apiUrl\": \"\"\n        };\n        node.warn(\"Chat data received, no HTTP request sent.\");\n        msg.payload = jsonData;\n        return msg;\n\n    } else {\n        node.warn(\"Invalid data format received.\");\n        return null; // Stop further processing\n    }\n\n    // Set the formatted JSON object as the payload\n    msg.payload = jsonData;\n\n    return msg;\n\n} else {\n    return null; // Ignore messages that don't match the expected format\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 1940,
+        "wires": [
+            [
+                "2f58edf3266a12b2",
+                "95247304fc4e6f5e"
+            ]
+        ]
+    },
+    {
+        "id": "28a31924aac68037",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1100,
+        "y": 1840,
+        "wires": []
+    },
+    {
+        "id": "77a43cf70e4d6655",
+        "type": "http in",
+        "z": "c333f693b53ee532",
+        "name": "Weather Data From AquaSafe",
+        "url": "api/broadcast-weather_data",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 340,
+        "y": 1300,
+        "wires": [
+            [
+                "90cc2331caa89fee",
+                "69e4b186e687098f",
+                "2f5f9dd5e9e00188"
+            ]
+        ]
+    },
+    {
+        "id": "90cc2331caa89fee",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 10",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 500,
+        "y": 1480,
+        "wires": []
+    },
+    {
+        "id": "912432441195d5f8",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 11",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1240,
+        "y": 1460,
+        "wires": []
+    },
+    {
+        "id": "74cb470255091379",
+        "type": "serial out",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "serial": "bb1c0e81fd51fa9e",
+        "x": 1130,
+        "y": 1300,
+        "wires": []
+    },
+    {
+        "id": "69e4b186e687098f",
+        "type": "function",
+        "z": "c333f693b53ee532",
+        "name": "Convert Weather Object and Make AT Command",
+        "func": "if (typeof msg.payload !== \"object\") {\n    try {\n        msg.payload = JSON.parse(msg.payload);\n    } catch (error) {\n        node.warn(\"Invalid JSON received\");\n        return null; // Stop processing if it's not a valid JSON object\n    }\n}\n\n// Extract required values\nvar id = msg.payload.id || \"\";\nvar w = msg.payload.w;\n\n// Ensure values exist before formatting\nif (id === \"\") {\n    node.warn(\"Missing required fields in payload\");\n    return null;\n}\n\nvar port = 1;               // Specify the port (e.g., 1)\nvar data = \"w|\" + id + \"|\" + w;    // Construct the data payload\nvar confirm = 0;            // Unconfirmed message\nvar retry = 3;              // Number of retries\n\n//Encode Data to Base 64\nvar encodedData = Buffer.from(data).toString('base64');\n\n// Build the AT command\nvar atCommand = \"AT+SEND=\" + port + \",\" + encodedData + \",\" + confirm + \",\" + retry + \"\\r\\n\";\n\n// Set the payload to the constructed AT command\nmsg.payload = atCommand;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 1300,
+        "wires": [
+            [
+                "912432441195d5f8",
+                "74cb470255091379"
+            ]
+        ]
+    },
+    {
+        "id": "08fd42d232327418",
+        "type": "http in",
+        "z": "c333f693b53ee532",
+        "name": "Hotspot Data From AquaSafe",
+        "url": "api/broadcast-hotspot_data",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 340,
+        "y": 1660,
+        "wires": [
+            [
+                "4d6a908efb429d5c",
+                "2d8e3f9a4108d00e"
+            ]
+        ]
+    },
+    {
+        "id": "4d6a908efb429d5c",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 12",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 1580,
+        "wires": []
+    },
+    {
+        "id": "2d8e3f9a4108d00e",
+        "type": "function",
+        "z": "c333f693b53ee532",
+        "name": "Convert Json Array and Make AT Command",
+        "func": "// Extract input data\nvar hotspots = msg.payload;\n\n// Check if the payload is an array\nif (!Array.isArray(hotspots)) {\n    node.error(\"Payload is not an array\", msg);\n    return null;\n}\n\nvar delayBetweenMessages = 2000; // Delay in milliseconds between transmissions\nvar messageIndex = 0;\n\nfunction sendNextMessage() {\n    if (messageIndex >= hotspots.length) {\n        return; // Stop if all messages are sent\n    }\n\n    // Extract required fields\n    var hotspot = hotspots[messageIndex];\n    var id = hotspot.hotspotId;\n    var latitude = hotspot.latitude;\n    var longitude = hotspot.longitude;\n\n    // Construct the individual payload\n    var data = `h|${id}|${latitude}|${longitude}`;\n\n    // Encode the string to Base64\n    var encodedData = Buffer.from(data).toString('base64');\n\n    var port = 1; // Specify the port\n    var confirm = 0; // Unconfirmed message\n    var retry = 3;\n\n    var atCommand = `AT+SEND=${port},${encodedData},${confirm},${retry}\\r\\n`;\n\n    // Send message to serial output\n    node.send({ payload: atCommand });\n\n    messageIndex++; // Move to the next message\n\n    // Schedule next message transmission\n    setTimeout(sendNextMessage, delayBetweenMessages);\n}\n\n// Start sending messages one by one\nsendNextMessage();\n\n// Return nothing, as messages are sent asynchronously\nreturn null;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 1660,
+        "wires": [
+            [
+                "dea163311f2216bb",
+                "11222687d73fabed"
+            ]
+        ]
+    },
+    {
+        "id": "dea163311f2216bb",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1200,
+        "y": 1560,
+        "wires": []
+    },
+    {
+        "id": "11222687d73fabed",
+        "type": "serial out",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "serial": "bb1c0e81fd51fa9e",
+        "x": 1210,
+        "y": 1660,
+        "wires": []
+    },
+    {
+        "id": "2f58edf3266a12b2",
+        "type": "http request",
+        "z": "c333f693b53ee532",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://172.31.255.253:3000/api/{{payload.apiUrl}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "basic",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "Content-Type",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 850,
+        "y": 1940,
+        "wires": [
+            [
+                "28a31924aac68037"
+            ]
+        ]
+    },
+    {
+        "id": "95247304fc4e6f5e",
+        "type": "debug",
+        "z": "c333f693b53ee532",
+        "name": "debug 14",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 1840,
+        "wires": []
+    },
+    {
+        "id": "2f5f9dd5e9e00188",
+        "type": "http response",
+        "z": "c333f693b53ee532",
+        "name": "weather-response-success",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "x": 800,
+        "y": 1480,
+        "wires": []
     },
     {
         "id": "bb1c0e81fd51fa9e",
